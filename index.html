@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head> 
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device content, initial-scale-1.0">
+        <!-- <link rel="icon" href="" type="image/jpg" class="rounded-circle"> -->
+        <style>
+            body {
+                margin: 0;
+                font-family: Arial, Helvetica, sans-serif;
+            }
+
+            /* 
+                Navigation Bar
+            */
+            .navbar {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                background-color: #333;
+                padding: 0.5em 1em;
+            }
+
+            .navbar a {
+                color: white;
+                text-decoration: none;
+                padding: 0.5em;
+            }
+
+            .navbar a:hover {
+                background-color: #575757;
+            }
+
+            /* 
+                Navigation Links
+            */
+            .nav-links {
+                display: flex;
+                gap: 1em;
+            }
+
+            /* 
+                Burger Menu (Smartphones)
+            */
+            .burger {
+                display: none;
+                cursor: pointer;
+                flex-direction: column;
+                gap: 5px;
+            }
+
+            .burger div {
+                width: 25px;
+                height: 3px;
+                background-color: white;
+            }
+
+            /* 
+                RDW
+            */
+            @media (max-width: 768px) {
+                .nav-links {
+                    display: none;
+                    flex-direction: column;
+                    background-color: #333;
+                    position: absolute;
+                    top: 60px;
+                    right: 0;
+                    width: 100%;
+                    text-align: center;
+                }
+
+                .nav-links.active {
+                    display: flex;
+                }
+
+                .burger {
+                    display: flex;
+                }
+            }
+        </style>
+        <title>Welcome</title>
+    </head>
+    <body>
+        <nav id="navbar">
+            <a href="#" class="logo">Logo</a>
+            <div class="nav-links" id="nav-links">
+                <a href="#">Home</a>
+                <a href="#">About</a>
+                <a href="#">Services</a>
+                <a href="#">Contact</a>
+            </div>
+            <div class="burger" id="burger">
+                <div></div>
+                <div></div>
+                <div></div>
+            </div>
+        </nav>
+        <script>
+            const burger = document.getElementById('burger');
+            const navLinks = document.getElementById('nav-links');
+
+            burger.addEventListener('click', () => {
+                navLinks.classList.toggle('active');
+            });
+        </script>
+    </body>
+</html>

@@ -2,6 +2,25 @@
   "dependencies": {
     "express": "^4.21.2",
     "morgan": "^1.10.0",
-    "mysql2": "^3.11.5"
-  }
+    "mysql2": "^3.11.5",
+    "path": "^0.12.7"
+  },
+  "name": "todoapp",
+  "version": "1.0.0",
+  "description": "A TODO application for users to have an organized flow of to-do lists.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GroodInWar/TODOAPP.git"
+  },
+  "author": "Gustavo Sakamoto de Toledo",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/GroodInWar/TODOAPP/issues"
+  },
+  "homepage": "https://github.com/GroodInWar/TODOAPP#readme"
 }
