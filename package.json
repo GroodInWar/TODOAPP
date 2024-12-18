@@ -1,8 +1,13 @@
 {
   "dependencies": {
+    "bcrypt": "^5.1.1",
+    "cookie-parser": "^1.4.7",
     "express": "^4.21.2",
+    "googleapi": "^1.0.2",
+    "googleapis": "^144.0.0",
     "morgan": "^1.10.0",
     "mysql2": "^3.11.5",
+    "nodemailer": "^6.9.16",
     "path": "^0.12.7"
   },
   "name": "todoapp",

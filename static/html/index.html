@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AllTODO App</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+<nav class="navbar">
+    <a href="/" class="logo">AllTODO</a>
+    <div class="nav-links">
+        <a href="/home">Home</a>
+        <a href="/about">About</a>
+        <a href="/services">Services</a>
+        <a href="/contact">Contact</a>
+        <button id="login-button" class="login-button">Login</button>
+    </div>
+</nav>
+
+<header>
+    <h1>Welcome to AllTODO App!</h1>
+    <p>Manage your tasks efficiently and stay organized.</p>
+</header>
+
+<script>
+    // Function to get a cookie by name
+    function getCookie(name) {
+        const cookies = document.cookie.split('; ');
+        for (let i = 0; i < cookies.length; i++) {
+            const [key, value] = cookies[i].split('=');
+            if (key === name) return decodeURIComponent(value);
+        }
+        return null;
+    }
+
+    // Redirect user based on login state
+    const loginButton = document.getElementById('login-button');
+    const username = getCookie('username');
+
+    if (username) {
+        // If user is logged in, redirect to home.html on button click
+        loginButton.textContent = 'Home';
+        loginButton.addEventListener('click', () => {
+            window.location.href = '/home';
+        });
+    } else {
+        // If user is not logged in, redirect to login.html on button click
+        loginButton.addEventListener('click', () => {
+            window.location.href = '/login';
+        });
+    }
+</script>
+</body>
+
+</html>
