@@ -43,6 +43,7 @@
         })
                 .then((response) => {
                   if (response.ok) {
+                    sessionStorage.setItem('username', username);
                     window.location.href = '/home';
                   } else {
                     alert('Login failed. Please try again.');

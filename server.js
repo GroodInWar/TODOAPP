@@ -3,28 +3,42 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const nodemailer = require('nodemailer');
 const bcryptLib = require("bcrypt");
+const mysql2 = require('mysql2');
 
+const HOST = 'localhost';
+const USER = 'C4131F24S002U85';
+const PASSWORD = '7275';
+const DATABASE = 'C4131F24S002U85';
 const PORT = 4131;
 const app = express();
 const staticHtmlDir = path.join(__dirname, 'static/html');
 const staticCssDir = path.join(__dirname, 'static/css');
 const staticJsDir = path.join(__dirname, 'static/js');
 
-// Fake database for testing
-const users = [
-    {
-        username: 'admin',
-        passwordHash: bcryptLib.hashSync('admin123', 10),
+// Real database connection
+const db = mysql2.createConnection({
+    host: HOST,
+    user: USER,
+    password: PASSWORD,
+    database: DATABASE
+});
+
+// Database connection
+db.connect((err) => {
+    if (err) {
+        console.error('Error connecting to database:', err);
+        process.exit(1);
     }
-]
+    console.log('Connected to database.');
+});
 
 // Middleware to parse cookies and JSON
 app.use(express.json());
 app.use(cookieParser());
 
 // Serve static files
-app.use('/css', express.static(staticCssDir)); // Serve CSS files
-app.use('/js', express.static(staticJsDir));   // Serve JS files
+app.use('/css', express.static(staticCssDir));
+app.use('/js', express.static(staticJsDir));
 
 // Authentication check function
 const isAuthenticated = (req) => req.cookies.username;
@@ -47,26 +61,28 @@ app.route('/login')
         const { username, password } = req.body;
 
         // Find the user by username
-        const user = users.find((u) => u.username === username);
-
-        if (user) {
-            // Compare the provided password with the stored hash
-            const isPasswordValid = await bcryptLib.compare(password, user.passwordHash);
-
-            if (isPasswordValid) {
-                // Set a cookie and respond with success
-                res.cookie('username', username, {
-                    maxAge: 60 * 60 * 1000, // 1 hour
-                    httpOnly: true,
-                    secure: true,
-                });
-                res.redirect('/home');
-            } else {
-                res.status(401).send('Invalid username or password.');
+        const query = 'SELECT * FROM users WHERE username = ?';
+        db.query(query, [username], async (err, results) => {
+            if (err) {
+                console.error('Error querying database:', err);
+                return res.status(500).send('Database error.');
             }
-        } else {
+
+            if (results.length > 0) {
+                const user = results[0];
+                const isPasswordValid = await bcryptLib.compare(password, user.password);
+
+                if (isPasswordValid) {
+                    res.cookie('username', username, {
+                        maxAge: 60 * 60 * 1000,
+                        httpOnly: true,
+                        secure: true,
+                    });
+                    return res.redirect('/home');
+                }
+            }
             res.status(401).send('Invalid username or password.');
-        }
+        });
     });
 
 // Serve index.html
@@ -74,19 +90,11 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(staticHtmlDir, 'index.html'));
 });
 
-// Serve contact.html
-app.get('/contact', (req, res) => {
-    res.sendFile(path.join(staticHtmlDir, 'contact.html'));
-});
-
-// Serve services.html
-app.get('/services', (req, res) => {
-    res.sendFile(path.join(staticHtmlDir, 'services.html'));
-});
-
-// Serve about.html
-app.get('/about', (req, res) => {
-    res.sendFile(path.join(staticHtmlDir, 'about.html'));
+// Serve other static pages
+['/contact', '/services', '/about'].forEach((route) => {
+    app.get(route, (req, res) => {
+        res.sendFile(path.join(staticHtmlDir, `${route.slice(1)}.html`));
+    });
 });
 
 // Serve home.html
@@ -100,6 +108,7 @@ app.get('/logout', (req, res) => {
     res.redirect('/login');
 });
 
+// Handle email sending
 app.post('/send-email', (req, res) => {
     const { name, email, message } = req.body;
 
@@ -113,15 +122,15 @@ app.post('/send-email', (req, res) => {
         secure: false,
         auth: {
             user: 'alltodoappreal@gmail.com',
-            pass: 'alltodoapp'
-        }
+            pass: 'alltodoapp',
+        },
     });
 
     const mailOptions = {
         from: email,
-        to: 'alltodoappreal@gmail.com>',
+        to: 'alltodoappreal@gmail.com',
         subject: 'Contact Form',
-        text: `Name: ${name}\nEmail: ${email}\nMessage: ${message}`
+        text: `Name: ${name}\nEmail: ${email}\nMessage: ${message}`,
     };
 
     transporter.sendMail(mailOptions, (error, info) => {
@@ -133,6 +142,50 @@ app.post('/send-email', (req, res) => {
         res.status(200).send('Email sent successfully.');
     });
 });
+
+// Task management routes
+app.route('/api/tasks')
+    .get(authMiddleware, (req, res) => { // Retrieve tasks
+        const username = req.cookies.username;
+        db.query('SELECT * FROM tasks WHERE username = ? ORDER BY created_at DESC', [username], (err, results) => {
+            if (err) {
+                console.error('Error fetching tasks:', err);
+                return res.status(500).send('Database error.');
+            }
+            res.json(results);
+        });
+    })
+    .post(authMiddleware, (req, res) => { // Create task
+        const username = req.cookies.username;
+        const { task } = req.body;
+
+        if (!task) {
+            return res.status(400).send('Task is required.');
+        }
+
+        db.query('INSERT INTO tasks (username, task) VALUES (?, ?)', [username, task], (err) => {
+            if (err) {
+                console.error('Error adding task:', err);
+                return res.status(500).send('Database error.');
+            }
+            res.status(201).send('Task added successfully.');
+        });
+    })
+    .put(authMiddleware, (req, res) => { // Update task
+        const { id, completed } = req.body;
+
+        if (typeof id === 'undefined' || typeof completed === 'undefined') {
+            return res.status(400).send('Missing required fields.');
+        }
+
+        db.query('UPDATE tasks SET completed = ? WHERE id = ?', [completed, id], (err) => {
+            if (err) {
+                console.error('Error updating task:', err);
+                return res.status(500).send('Database error.');
+            }
+            res.status(200).send('Task updated successfully.');
+        });
+    });
 
 // Start server
 app.listen(PORT, () => {

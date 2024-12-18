@@ -105,32 +105,36 @@ form input:focus {
 }
 
 .task-list {
+    list-style-type: none;
+    padding: 0;
     margin: 20px 0;
 }
 
-.task-list li {
-    background: #eee;
+.task-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     padding: 10px;
-    margin-bottom: 5px;
+    margin: 5px 0;
+    border: 1px solid #ccc;
     border-radius: 5px;
 }
 
-.task-list li:hover {
-    background: #ddd;
+.task-name {
+    flex-grow: 1;
+    margin-right: 10px;
 }
 
-.task-list li.checked {
-    text-decoration: line-through;
-    opacity: 0.5;
+.completed {
+    background-color: lightgreen;
+    color: black;
 }
 
-.task-list li span {
-    float: right;
+.add-button {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
     cursor: pointer;
-}
-
-.task-list li span:hover {
-    color: red;
 }
 
 .task-form {
