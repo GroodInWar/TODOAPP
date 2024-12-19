@@ -33,6 +33,24 @@ db.connect((err) => {
         process.exit(1);
     }
     console.log('Connected to database.');
+
+    const adminUsername = 'admin';
+    const adminPassword = 'admin123';
+
+    bcryptLib.hash(adminPassword, 10, (err, hashedPassword) => {
+        if (err) {
+            console.error('Error hashing admin password:', err);
+            return;
+        }
+        const query = 'INSERT INTO users (username, password, role) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE password = VALUES(password)';
+        db.query(query, [adminUsername, hashedPassword, 'admin'], (err) => {
+            if (err) {
+                console.error('Error adding admin user:', err);
+            } else {
+                console.log('Admin user ensured in database.');
+            }
+        });
+    });
 });
 
 // Middleware to parse cookies and JSON
@@ -52,7 +70,7 @@ function authMiddleware(req, res, next) {
     if (isAuthenticated(req)) {
         next();
     } else {
-        res.redirect('/login'); // Redirect to log in if not authenticated
+        res.redirect('/login');
     }
 }
 
@@ -63,19 +81,15 @@ app.route('/login')
     })
     .post(async (req, res) => {
         const { username, password } = req.body;
-
-        // Find the user by username
         const query = 'SELECT * FROM users WHERE username = ?';
         db.query(query, [username], async (err, results) => {
             if (err) {
                 console.error('Error querying database:', err);
                 return res.status(500).send('Database error.');
             }
-
             if (results.length > 0) {
                 const user = results[0];
                 const isPasswordValid = await bcryptLib.compare(password, user.password);
-
                 if (isPasswordValid) {
                     res.cookie('username', username, {
                         maxAge: 60 * 60 * 1000,
@@ -115,11 +129,9 @@ app.get('/logout', (req, res) => {
 // Handle email sending
 app.post('/send-email', (req, res) => {
     const { name, email, message } = req.body;
-
     if (!name || !email || !message) {
         return res.status(400).send('Missing required fields.');
     }
-
     const transporter = nodemailer.createTransport({
         host: 'smtp.gmail.com',
         port: 587,
@@ -129,14 +141,12 @@ app.post('/send-email', (req, res) => {
             pass: 'alltodoapp',
         },
     });
-
     const mailOptions = {
         from: email,
         to: 'alltodoappreal@gmail.com',
         subject: 'Contact Form',
         text: `Name: ${name}\nEmail: ${email}\nMessage: ${message}`,
     };
-
     transporter.sendMail(mailOptions, (error, info) => {
         if (error) {
             console.error('Error sending email:', error);
@@ -149,7 +159,7 @@ app.post('/send-email', (req, res) => {
 
 // Task management routes
 app.route('/api/tasks')
-    .get(authMiddleware, (req, res) => { // Retrieve tasks
+    .get(authMiddleware, (req, res) => {
         const username = req.cookies.username;
         db.query('SELECT * FROM tasks WHERE username = ? ORDER BY created_at DESC', [username], (err, results) => {
             if (err) {
@@ -159,14 +169,12 @@ app.route('/api/tasks')
             res.json(results);
         });
     })
-    .post(authMiddleware, (req, res) => { // Create task
+    .post(authMiddleware, (req, res) => {
         const username = req.cookies.username;
         const { task } = req.body;
-
         if (!task) {
             return res.status(400).send('Task is required.');
         }
-
         db.query('INSERT INTO tasks (username, task) VALUES (?, ?)', [username, task], (err) => {
             if (err) {
                 console.error('Error adding task:', err);
@@ -175,13 +183,11 @@ app.route('/api/tasks')
             res.status(201).send('Task added successfully.');
         });
     })
-    .put(authMiddleware, (req, res) => { // Update task
+    .put(authMiddleware, (req, res) => {
         const { id, completed } = req.body;
-
         if (typeof id === 'undefined' || typeof completed === 'undefined') {
             return res.status(400).send('Missing required fields.');
         }
-
         db.query('UPDATE tasks SET completed = ? WHERE id = ?', [completed, id], (err) => {
             if (err) {
                 console.error('Error updating task:', err);
