@@ -14,6 +14,7 @@ const app = express();
 const staticHtmlDir = path.join(__dirname, 'static/html');
 const staticCssDir = path.join(__dirname, 'static/css');
 const staticJsDir = path.join(__dirname, 'static/js');
+const staticImgDir = path.join(__dirname, 'static/img');
 
 // Real database connection
 const db = mysql2.createConnection({
@@ -39,6 +40,7 @@ app.use(cookieParser());
 // Serve static files
 app.use('/css', express.static(staticCssDir));
 app.use('/js', express.static(staticJsDir));
+app.use('/img', express.static(staticImgDir));
 
 // Authentication check function
 const isAuthenticated = (req) => req.cookies.username;
