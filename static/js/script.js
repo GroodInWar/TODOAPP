@@ -146,6 +146,9 @@ document.addEventListener('DOMContentLoaded', () => {
     loadTaskList();
 
     // Add Task Button Listener
-    document.getElementById('add-task-button').addEventListener('click', addTask);
+    document.getElementById('add-task-button').addEventListener('click', () => {
+        addTask();
+        window.location.reload();
+    });
 });
 

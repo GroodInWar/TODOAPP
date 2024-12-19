@@ -142,6 +142,7 @@ app.post('/send-email', (req, res) => {
             pass: 'alltodoapp',
         },
     });
+
     const mailOptions = {
         from: email,
         to: 'alltodoappreal@gmail.com',
@@ -168,7 +169,6 @@ app.route('/api/tasks')
                 return res.status(500).send('Database error.');
             }
             res.json(results);
-            res.redirect('/home');
         });
     })
     .post(authMiddleware, (req, res) => { // Add tasks
