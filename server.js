@@ -5,10 +5,11 @@ const nodemailer = require('nodemailer');
 const bcryptLib = require("bcrypt");
 const mysql2 = require('mysql2');
 
-const HOST = 'localhost';
+const HOST = 'cse-mysql-classes-01.cse.umn.edu';
 const USER = 'C4131F24S002U85';
 const PASSWORD = '7275';
 const DATABASE = 'C4131F24S002U85';
+const DBPORT = 3306;
 const PORT = 4131;
 const app = express();
 const staticHtmlDir = path.join(__dirname, 'static/html');
@@ -21,7 +22,8 @@ const db = mysql2.createConnection({
     host: HOST,
     user: USER,
     password: PASSWORD,
-    database: DATABASE
+    database: DATABASE,
+    port: DBPORT
 });
 
 // Database connection
