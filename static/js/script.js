@@ -30,7 +30,7 @@ function addTaskToUI(task) {
     // Create complete button
     const completeButton = document.createElement('button');
     completeButton.className = `button ${task.completed ? 'mark-incomplete' : 'mark-complete'}`;
-    completeButton.textContent = task.completed ? 'Incomplete' : 'Complete';
+    completeButton.textContent = task.completed ? 'Uncompleted' : 'Completed';
     completeButton.onclick = () => changeTaskStatus(task.id, taskName, completeButton);
 
     // Create remove button
@@ -56,14 +56,22 @@ function addTaskToUI(task) {
 // Fetch tasks from the server
 function loadTaskList() {
     fetch('/api/tasks')
-        .then((response) => response.json())
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error('Error fetching tasks: '+ response.statusText);
+            }
+            return response.json();
+        })
         .then((tasks) => {
             const taskList = document.getElementById('tasks-list');
             taskList.innerHTML = '';
             tasks.forEach(addTaskToUI);
             taskCounter = tasks.length;
         })
-        .catch((err) => console.error('Error fetching tasks:', err));
+        .catch((err) => {
+            console.error('Error fetching tasks:', err);
+            alert('Error fetching tasks. Please try again later.');
+        });
 }
 
 // Change task status
@@ -115,7 +123,8 @@ function addTask() {
             }
             return response.json();
         })
-        .then(addTaskToUI)
+        .then(newTask => {addTaskToUI(newTask);
+        })
         .catch((err) => console.error('Error adding task:', err));
 }
 
@@ -139,3 +148,5 @@ document.addEventListener('DOMContentLoaded', () => {
     // Add Task Button Listener
     document.getElementById('add-task-button').addEventListener('click', addTask);
 });
+
+document.addEventListener('', () => {})

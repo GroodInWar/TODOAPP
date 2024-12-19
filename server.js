@@ -35,7 +35,7 @@ db.connect((err) => {
     console.log('Connected to database.');
 
     const adminUsername = 'admin';
-    const adminPassword = 'securepassword123';
+    const adminPassword = 'admin123';
 
     bcryptLib.hash(adminPassword, 10, (err, hashedPassword) => {
         if (err) {
@@ -159,7 +159,7 @@ app.post('/send-email', (req, res) => {
 
 // Task management routes
 app.route('/api/tasks')
-    .get(authMiddleware, (req, res) => {
+    .get(authMiddleware, (req, res) => { // View tasks
         const username = req.cookies.username;
         db.query('SELECT * FROM tasks WHERE username = ? ORDER BY created_at DESC', [username], (err, results) => {
             if (err) {
@@ -167,9 +167,10 @@ app.route('/api/tasks')
                 return res.status(500).send('Database error.');
             }
             res.json(results);
+            res.redirect('/home');
         });
     })
-    .post(authMiddleware, (req, res) => {
+    .post(authMiddleware, (req, res) => { // Add tasks
         const username = req.cookies.username;
         const { task } = req.body;
         if (!task) {
@@ -183,7 +184,7 @@ app.route('/api/tasks')
             res.status(201).send('Task added successfully.');
         });
     })
-    .put(authMiddleware, (req, res) => {
+    .put(authMiddleware, (req, res) => { // Update tasks
         const { id, completed } = req.body;
         if (typeof id === 'undefined' || typeof completed === 'undefined') {
             return res.status(400).send('Missing required fields.');
