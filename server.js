@@ -132,6 +132,7 @@ app.post('/send-email', (req, res) => {
     if (!name || !email || !message) {
         return res.status(400).send('Missing required fields.');
     }
+
     const transporter = nodemailer.createTransport({
         host: 'smtp.gmail.com',
         port: 587,
@@ -147,12 +148,12 @@ app.post('/send-email', (req, res) => {
         subject: 'Contact Form',
         text: `Name: ${name}\nEmail: ${email}\nMessage: ${message}`,
     };
+
     transporter.sendMail(mailOptions, (error, info) => {
         if (error) {
             console.error('Error sending email:', error);
             return res.status(500).send('Failed to send email.');
         }
-        console.log('Email sent:', info.response);
         res.status(200).send('Email sent successfully.');
     });
 });
@@ -196,7 +197,18 @@ app.route('/api/tasks')
             }
             res.status(200).send('Task updated successfully.');
         });
-    });
+    }).delete(authMiddleware, (req, res) => {
+        const { id } = req.body;
+        if (typeof id === 'undefined') {
+            return res.status(400).send('Missing required fields.');
+        }
+        db.query('DELETE FROM tasks WHERE id = ?', [id], (err) => {
+            if (err) {
+                console.error('Error deleting task:', err);
+                return res.status(500).send('Database error.');
+            }
+        });
+});
 
 // Start server
 app.listen(PORT, () => {

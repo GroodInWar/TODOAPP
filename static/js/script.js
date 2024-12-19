@@ -149,4 +149,3 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('add-task-button').addEventListener('click', addTask);
 });
 
-document.addEventListener('', () => {})
