@@ -35,7 +35,7 @@ db.connect((err) => {
     console.log('Connected to database.');
 
     const adminUsername = 'admin';
-    const adminPassword = 'admin123';
+    const adminPassword = 'securepassword123';
 
     bcryptLib.hash(adminPassword, 10, (err, hashedPassword) => {
         if (err) {
